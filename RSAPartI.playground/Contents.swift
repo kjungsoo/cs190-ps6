@@ -54,7 +54,7 @@ The hardest function would have been the first one, but I already implemented a 
 ###### _The contents of this repository are licensed under the_ [Creative Commons Attribution-ShareAlike License](http://creativecommons.org/licenses/by-sa/3.0/)
 
 */
-
+/*
 // Returns an array of booleans of length highest, where each boolean says whether that number is prime.
 func sieveOfEratosthenes(highest: Int) -> [Bool] {
     // Initially the sieve is agnostic as to whether any number is prime or not (initialized to all nil):
@@ -91,25 +91,104 @@ func sieveOfEratosthenes(highest: Int) -> [Bool] {
 func primes(highest: Int) -> [Int] {
     return []
 }
+ */
+import Foundation
 
-// Given a list of candidate factors, this should return the first factor of h. If none of the candidate factors are factors of h, then return nil.
-func factor(h: Int, candidates: [Int]) -> Int? {
-    return nil
+func sieve(amount: Int) -> [Bool] {
+    var sieve = [Bool](count:amount, repeatedValue: true)
+    sieve[0] = false
+    sieve[1] = false
+    
+    for idx in 2 ..< Int(sqrt(Float(amount))) {
+        if (sieve[idx] == true) {
+            var idxj = idx * idx
+            while (idxj < amount) {
+                if (sieve[idxj] != false) {
+                    sieve[idxj] = false
+                    idxj += idx
+                }
+                else {
+                    idxj += idx
+                }
+            }
+        }
+    }
+    return sieve
 }
 
-// Given a list of candidate factors, this should return all the factors of g. You just repeatedly call the previous function, and if you get a factor, you append it to the list and divide g by that factor. Repeat until there are no more factors.
+func primes(amount: Int) -> [Int] {
+    let sievedlist = sieve(amount)
+    var prime: [Int] = []
+    for i in 0 ..< amount {
+        if (sievedlist[i] == true) {
+            prime.append(i)
+        }
+    }
+    return prime
+}
+
+func gcd_euclidean(first_num: Int, second_num: Int) -> Int {
+    var numer = first_num, denom = second_num
+    while denom > 0 {
+        let temp = numer % denom
+        numer = denom
+        denom = temp
+    }
+    return numer
+}
+
+// done
+func factor(h: Int, candidates: [Int]) -> Int? {
+    var firstfactor: Int?
+    for value in candidates {
+        let gcd = gcd_euclidean(h, second_num: value)
+        if (gcd == value) {
+            firstfactor = gcd
+            break
+        }
+        else {
+            firstfactor = nil
+        }
+    }
+    return firstfactor
+}
+
+// done
 func factors(g: Int, candidates: [Int]) -> [Int] {
-    return []
+    var value = g, firstfactor = factor(value, candidates: candidates), factorsofg: [Int] = []
+    if (firstfactor != nil) {
+        while (firstfactor != nil) {
+            factorsofg.append(firstfactor!)
+            value /= firstfactor!
+            firstfactor = factor(value, candidates: candidates)
+        }
+    }
+    return factorsofg
 }
 
 // This function should first generate a list of primes that are candidates to divide g. HINT: the largest prime that could possibly divide g is less than or equal to the square root of g. Once you have the list of candidates, just call the previous function.
 func factors(g: Int) -> [Int] {
-    return []
+    let highest = Int(sqrt(Float(g)))
+    var value = g, primefactors: [Int] = []
+    for prime in primes(highest) {
+        while (value%prime == 0) {
+            value /= prime
+            primefactors.append(prime)
+        }
+    }
+    return primefactors
 }
 
 // This function returns all coprimes of a given integer f that are smaller than f. Basically, you need to first factor f. Then you need to look at all the numbers in the range 2..<f. For each of those numbers, test whether any of the factors of f divides the number.
 func coprimes(f: Int) -> [Int] {
-    return []
+    let integer = f
+    var fcoprime: [Int] = []
+    for prime in 2 ..< f {
+        if (gcd_euclidean(integer, second_num: prime) == 1) {
+            fcoprime.append(prime)
+        }
+    }
+    return fcoprime
 }
 
 protocol Crypto {
